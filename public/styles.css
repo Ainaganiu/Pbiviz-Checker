@@ -14,8 +14,13 @@
   --white: #ffffff;
   --paper: #f7f9fc;
 
-  --pass: var(--blue-600);
-  --fail: var(--black);
+  /* Status is the one place the palette breaks from blue/white/black: pass and
+     fail need to read at a glance, and green/red is what that audience expects.
+     Both are dark enough to carry white text at AA contrast. */
+  --pass: #0f7a34;
+  --pass-soft: #e7f6ec;
+  --fail: #c22626;
+  --fail-soft: #fdeaea;
   --skip: var(--ink-3);
 
   --radius: 14px;
@@ -216,6 +221,20 @@ button:focus-visible,
 .confidence strong { color: var(--black); }
 .confidence.level-low { border-left: 4px solid var(--black); background: var(--white); }
 
+/* Deliberately neutral, not red: red now means "this check failed", and this is
+   a scope caveat rather than a finding. */
+.disclaimer {
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--black);
+  border-radius: var(--radius);
+  padding: 1rem 1.2rem;
+  margin: 0 0 1.5rem;
+  font-size: 0.92rem;
+  color: var(--ink-2);
+  background: var(--white);
+}
+.disclaimer strong { color: var(--black); }
+
 /* ---------- summary ---------- */
 .summary-card {
   border: 1px solid var(--blue-100);
@@ -259,9 +278,16 @@ p.section-note { margin: 0 0 1rem; color: var(--ink-3); font-size: 0.93rem; }
   display: grid; place-items: center;
   font-size: 0.72rem; font-weight: 800; color: var(--white);
 }
-.status-pill.pass { background: var(--blue-600); }
-.status-pill.fail { background: var(--black); }
-.status-pill.skipped { background: var(--ink-3); }
+.status-pill.pass { background: var(--pass); }
+.status-pill.fail { background: var(--fail); }
+.status-pill.skipped { background: var(--skip); }
+
+/* A tint on the row itself, so a failing check is findable while scrolling and
+   not only when the 22px pill is in view. */
+.finding.fail { background: var(--fail-soft); }
+.category > summary.pass .status-pill { background: var(--pass); }
+.category > summary.fail { background: var(--fail-soft); }
+.category > summary.fail:hover { background: #fbdede; }
 
 .finding { display: grid; grid-template-columns: 22px 1fr; gap: 0.75rem; padding: 1rem 1.2rem; border-top: 1px solid var(--blue-050); }
 .finding:first-child { border-top: none; }

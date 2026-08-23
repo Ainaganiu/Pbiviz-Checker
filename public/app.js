@@ -9,7 +9,7 @@ const checkAnother = document.getElementById('check-another');
 
 const STATUS_GLYPH = { pass: '✓', fail: '✕', skipped: '–' };
 const STATUS_WORD = { pass: 'Pass', fail: 'Fail', skipped: 'Not checked' };
-const BAND_COLOR = { ready: '#1450d6', minor: '#1a63ff', several: '#3b4351', blocked: '#05070c' };
+const BAND_COLOR = { ready: '#0f7a34', minor: '#b8860b', several: '#d2691e', blocked: '#c22626' };
 
 // --- small DOM helpers ----------------------------------------------------
 
@@ -97,7 +97,7 @@ function renderSummary(result) {
 }
 
 function renderFinding(finding) {
-  const row = el('div', 'finding');
+  const row = el('div', `finding ${finding.status}`);
   const pill = el('span', `status-pill ${finding.status}`, STATUS_GLYPH[finding.status]);
   pill.title = STATUS_WORD[finding.status];
   row.append(pill);
@@ -146,7 +146,7 @@ function renderCategories(result) {
     // Anything failing opens by default; clean categories stay collapsed.
     details.open = category.status === 'fail';
 
-    const summary = el('summary');
+    const summary = el('summary', category.status);
     summary.append(el('span', 'caret', '▶'));
     const pill = el('span', `status-pill ${category.status}`, STATUS_GLYPH[category.status]);
     pill.title = STATUS_WORD[category.status];

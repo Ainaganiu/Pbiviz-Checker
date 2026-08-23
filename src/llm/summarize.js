@@ -16,9 +16,12 @@ const DEFAULT_OPENROUTER_MODELS = [
   'nvidia/nemotron-nano-9b-v2:free',
   'google/gemma-4-26b-a4b-it:free',
 ];
+// Hugging Face slugs are case-sensitive and differ from OpenRouter's; these three
+// are confirmed present on the Inference Providers router.
 const DEFAULT_HF_MODELS = [
-  'meta-llama/Meta-Llama-3-8B-Instruct',
-  'mistralai/Mistral-7B-Instruct-v0.3',
+  'Qwen/Qwen2.5-72B-Instruct',
+  'google/gemma-3-27b-it',
+  'meta-llama/Llama-3.1-8B-Instruct',
 ];
 
 function modelList(value, fallback) {
@@ -96,6 +99,11 @@ function looksLikeReasoning(summary) {
     || /\b(the user (wants|asks)|per the instructions|as requested above)\b/i.test(summary);
 }
 
+/** Small models like to announce themselves: "Here is a 3-sentence summary:". */
+function stripPreamble(text) {
+  return text.replace(/^\s*(here(?:'s| is| are)|below is|sure[,!]?)[^\n:]{0,80}:\s*/i, '').trim();
+}
+
 function parseResponse(text) {
   // Strip explicit thinking blocks, then split on the LAST "FIXES:" so a model
   // that mentions the token while narrating doesn't derail the split.
@@ -106,13 +114,15 @@ function parseResponse(text) {
   const summary = (marker === -1 ? trimmed : trimmed.slice(0, marker)).trim();
   const fixesPart = marker === -1 ? '' : trimmed.slice(marker + 'FIXES:'.length);
 
+  // Some models put every fix on one line ("1. Do this. 2. Do that."), so split
+  // on the numbering itself rather than trusting newlines.
   const fixes = fixesPart
-    .split('\n')
+    .split(/\n|(?=\s\d+[.)]\s)/)
     .map((line) => line.replace(/^\s*(\d+[.)]|[-*])\s*/, '').trim())
     .filter(Boolean)
     .slice(0, 3);
 
-  return { summary, fixes };
+  return { summary: stripPreamble(summary), fixes };
 }
 
 async function callModel(provider, model, payload) {
@@ -126,7 +136,7 @@ async function callModel(provider, model, payload) {
       body: JSON.stringify({
         model,
         temperature: 0.2,
-        max_tokens: 700,
+        max_tokens: 1500,
         ...(provider.extraBody ?? {}),
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
@@ -181,4 +191,4 @@ export function configuredProviders() {
 }
 
 // Exported for tests: these two decide whether a model's answer is usable.
-export const _internals = { parseResponse, looksLikeReasoning };
+export const _internals = { parseResponse, looksLikeReasoning, stripPreamble };

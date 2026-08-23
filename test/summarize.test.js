@@ -57,3 +57,26 @@ test('the payload carries no file content, only derived findings', () => {
   assert.equal(payload.failures.length, 1);
   assert.equal(payload.failures[0].id, 'BLK-001');
 });
+
+test('a model announcing itself has the preamble removed', () => {
+  // Verbatim shape returned by Llama-3.1-8B-Instruct in live testing.
+  const parsed = parseResponse('Here is a 3-sentence plain-English summary:\n\nThe code has two critical security issues.\n\nFIXES:\n1. Replace eval().');
+  assert.equal(parsed.summary, 'The code has two critical security issues.');
+});
+
+test('a summary that merely starts with "Here" is left alone', () => {
+  assert.equal(_internals.stripPreamble('Here the visual fails on two counts.'), 'Here the visual fails on two counts.');
+});
+
+test('fixes crammed onto one line are still split apart', () => {
+  // Verbatim shape returned by Qwen2.5-72B-Instruct in live testing.
+  const parsed = parseResponse('The visual has issues.\n\nFIXES: 1. Remove the wildcard (NET-002). 2. Declare local storage (STO-001). 3. Add error handling (PKG-005).');
+  assert.equal(parsed.fixes.length, 3);
+  assert.equal(parsed.fixes[1], 'Declare local storage (STO-001).');
+});
+
+test('a fix containing a decimal is not split mid-sentence', () => {
+  const parsed = parseResponse('Summary here.\n\nFIXES:\n1. Upgrade lodash to 4.17.21 immediately.');
+  assert.equal(parsed.fixes.length, 1);
+  assert.equal(parsed.fixes[0], 'Upgrade lodash to 4.17.21 immediately.');
+});
