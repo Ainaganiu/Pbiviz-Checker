@@ -1,7 +1,14 @@
 const dropzone = document.getElementById('dropzone');
 const fileInput = document.getElementById('file-input');
 const browseBtn = document.getElementById('browse-btn');
-const progress = document.getElementById('progress');
+const loader = document.getElementById('loader');
+const loaderTitle = document.getElementById('loader-title');
+const loaderFile = document.getElementById('loader-file');
+const loaderClock = document.getElementById('loader-clock');
+const loaderTrack = document.getElementById('loader-track');
+const loaderFill = document.getElementById('loader-fill');
+const loaderNote = document.getElementById('loader-note');
+const loaderSteps = document.getElementById('loader-steps');
 const errorNotice = document.getElementById('error-notice');
 const results = document.getElementById('results');
 const categoriesEl = document.getElementById('categories');
@@ -20,9 +27,81 @@ function el(tag, className, text) {
   return node;
 }
 
-function setBusy(busy) {
-  progress.hidden = !busy;
-  dropzone.setAttribute('aria-disabled', String(busy));
+// --- loader ---------------------------------------------------------------
+// Upload percentage is real (XHR reports the bytes). Everything after that has
+// no progress signal available, so the bar switches to an indeterminate sweep
+// rather than inventing a number, and a clock keeps running so the wait reads
+// as work rather than a hang.
+
+const PATIENCE_AFTER_MS = 8000;
+let clockTimer = null;
+let patienceTimer = null;
+let startedAt = 0;
+
+function formatBytes(bytes) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+
+function setStep(current) {
+  const order = ['upload', 'analyze', 'summary'];
+  const index = order.indexOf(current);
+  for (const li of loaderSteps.children) {
+    const position = order.indexOf(li.dataset.step);
+    li.classList.toggle('done', position < index);
+    li.classList.toggle('active', position === index);
+  }
+}
+
+function startLoader(file) {
+  startedAt = Date.now();
+  loaderFile.textContent = `${file.name} · ${formatBytes(file.size)}`;
+  loaderTitle.textContent = 'Uploading';
+  loaderNote.textContent = 'Nothing is written to disk at any point.';
+  loaderNote.classList.remove('patience');
+  loaderTrack.classList.remove('indeterminate');
+  loaderFill.style.width = '0%';
+  setStep('upload');
+
+  dropzone.hidden = true;
+  loader.hidden = false;
+
+  clockTimer = setInterval(() => {
+    loaderClock.textContent = `${Math.round((Date.now() - startedAt) / 1000)}s`;
+  }, 250);
+}
+
+function onUploadProgress(loaded, total) {
+  const percent = Math.min(100, Math.round((loaded / total) * 100));
+  loaderFill.style.width = `${percent}%`;
+  loaderTitle.textContent = `Uploading · ${percent}%`;
+}
+
+function enterAnalyzePhase() {
+  setStep('analyze');
+  loaderTitle.textContent = 'Analyzing in memory';
+  loaderTrack.classList.add('indeterminate');
+  loaderNote.textContent = 'Unzipping the package and running all 27 checks. Your file is never written to disk.';
+
+  // The checks finish in a couple of seconds; anything longer is the free-tier
+  // model writing the summary. Say so instead of leaving the user guessing.
+  patienceTimer = setTimeout(() => {
+    setStep('summary');
+    loaderTitle.textContent = 'Writing the summary';
+    loaderNote.textContent = 'The checks are done. A free-tier model is writing the plain-English summary, which can take up to 20 seconds — the results appear as soon as it answers.';
+    loaderNote.classList.add('patience');
+  }, PATIENCE_AFTER_MS);
+}
+
+function stopLoader() {
+  clearInterval(clockTimer);
+  clearTimeout(patienceTimer);
+  clockTimer = null;
+  patienceTimer = null;
+  loader.hidden = true;
+  loaderClock.textContent = '';
+  dropzone.hidden = false;
 }
 
 function showError(message) {
@@ -183,25 +262,48 @@ async function check(file) {
 
   clearError();
   results.hidden = true;
-  setBusy(true);
-
-  const body = new FormData();
-  body.append('file', file);
+  startLoader(file);
 
   try {
-    const response = await fetch('/api/analyze', { method: 'POST', body });
-    const payload = await response.json();
-    if (!response.ok) {
-      showError(payload.error ?? 'That file could not be analyzed.');
+    const { status, body } = await postFile(file);
+    if (status < 200 || status >= 300) {
+      showError(body?.error ?? 'That file could not be analyzed.');
       return;
     }
-    render(payload);
+    render(body);
   } catch {
     showError('The check could not be completed — the connection dropped before a result came back. Nothing was stored.');
   } finally {
-    setBusy(false);
+    stopLoader();
     fileInput.value = '';
   }
+}
+
+/**
+ * XHR rather than fetch: it is the only way to get real upload progress events,
+ * which is what turns the first phase of the loader from a guess into a fact.
+ */
+function postFile(file) {
+  return new Promise((resolve, reject) => {
+    const body = new FormData();
+    body.append('file', file);
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/analyze');
+    xhr.responseType = 'json';
+
+    xhr.upload.addEventListener('progress', (event) => {
+      if (event.lengthComputable) onUploadProgress(event.loaded, event.total);
+    });
+    // Bytes are all sent; from here the server is working and we have no signal.
+    xhr.upload.addEventListener('load', enterAnalyzePhase);
+
+    xhr.addEventListener('load', () => resolve({ status: xhr.status, body: xhr.response }));
+    xhr.addEventListener('error', () => reject(new Error('network error')));
+    xhr.addEventListener('abort', () => reject(new Error('aborted')));
+
+    xhr.send(body);
+  });
 }
 
 browseBtn.addEventListener('click', (event) => {

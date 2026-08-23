@@ -154,19 +154,95 @@ button:focus-visible,
 }
 .notice[hidden] { display: none; }
 
-.progress {
-  display: flex; align-items: center; gap: 0.8rem;
-  color: var(--ink-2); font-weight: 600; margin: 1.5rem 0;
+/* ---------- loader ----------
+   A single endlessly-rotating spinner reads as "possibly stuck". This loader
+   shows a real percentage while bytes are moving, then names the phase it is
+   waiting on and keeps a clock running, so a 20s summary looks like work in
+   progress rather than a hang. */
+.loader {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--white);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+  margin: 2rem 0 1rem;
+  animation: loader-in 0.25s ease-out;
 }
-.spinner {
-  width: 20px; height: 20px; flex: none;
-  border: 3px solid var(--blue-100);
-  border-top-color: var(--blue-600);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
+.loader[hidden] { display: none; }
+@keyframes loader-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
 @keyframes spin { to { transform: rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 3s; } }
+
+.loader-head { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+.loader-ring {
+  width: 40px; height: 40px; flex: none; border-radius: 50%;
+  border: 4px solid var(--blue-100);
+  border-top-color: var(--blue-600);
+  animation: spin 0.9s linear infinite;
+}
+.loader-title { margin: 0; font-size: 1.05rem; font-weight: 700; letter-spacing: -0.015em; color: var(--black); }
+.loader-file { margin: 0.1rem 0 0; font-size: 0.86rem; color: var(--ink-3); font-family: var(--mono); }
+.loader-clock {
+  margin-left: auto; flex: none;
+  font-family: var(--mono); font-size: 0.9rem; font-weight: 600;
+  color: var(--ink-3); font-variant-numeric: tabular-nums;
+}
+
+.loader-track {
+  height: 8px; border-radius: 99px; background: var(--blue-100);
+  overflow: hidden; position: relative;
+}
+.loader-fill {
+  height: 100%; width: 0; border-radius: 99px;
+  background: var(--blue-600);
+  transition: width 0.15s linear;
+}
+/* Once the bytes are gone the duration is unknown, so the bar sweeps instead
+   of pretending to know a percentage. */
+.loader-track.indeterminate .loader-fill {
+  width: 35%;
+  animation: loader-sweep 1.4s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+@keyframes loader-sweep {
+  0% { transform: translateX(-110%); }
+  100% { transform: translateX(320%); }
+}
+
+.loader-steps { list-style: none; margin: 1.1rem 0 0; padding: 0; display: grid; gap: 0.45rem; }
+.loader-steps li {
+  display: flex; align-items: center; gap: 0.6rem;
+  font-size: 0.92rem; color: var(--ink-3);
+  transition: color 0.2s;
+}
+.loader-steps li::before {
+  content: ""; flex: none;
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 2px solid var(--line);
+  background: var(--white);
+}
+.loader-steps li.active { color: var(--black); font-weight: 600; }
+.loader-steps li.active::before {
+  border-color: var(--blue-600);
+  box-shadow: inset 0 0 0 3px var(--blue-600);
+  animation: loader-pulse 1.2s ease-in-out infinite;
+}
+.loader-steps li.done { color: var(--ink-2); }
+.loader-steps li.done::before {
+  border-color: var(--pass);
+  background: var(--pass);
+  box-shadow: none;
+}
+@keyframes loader-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+
+.loader-note { margin: 1rem 0 0; font-size: 0.86rem; color: var(--ink-3); }
+.loader-note.patience { color: var(--ink-2); }
+
+@media (prefers-reduced-motion: reduce) {
+  .loader { animation: none; }
+  .loader-ring { animation-duration: 3s; }
+  .loader-steps li.active::before { animation: none; }
+  .loader-track.indeterminate .loader-fill { width: 100%; animation: loader-pulse 2s ease-in-out infinite; transform: none; }
+}
 
 /* ---------- results ---------- */
 .results { padding-bottom: 5rem; }

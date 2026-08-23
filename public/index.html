@@ -36,9 +36,31 @@
       </div>
 
       <div class="notice" id="error-notice" hidden role="alert"></div>
-      <div class="progress" id="progress" hidden>
-        <span class="spinner" aria-hidden="true"></span>
-        <span>Unzipping in memory and running the checklist…</span>
+
+      <!-- Replaces a bare perpetual spinner: the wait is dominated by the LLM
+           summary, so the loader names the phase it is in and keeps a clock
+           running rather than implying it might never end. -->
+      <div class="loader" id="loader" hidden aria-live="polite">
+        <div class="loader-head">
+          <span class="loader-ring" aria-hidden="true"></span>
+          <div>
+            <p class="loader-title" id="loader-title">Uploading…</p>
+            <p class="loader-file" id="loader-file"></p>
+          </div>
+          <span class="loader-clock" id="loader-clock" aria-hidden="true"></span>
+        </div>
+
+        <div class="loader-track" id="loader-track">
+          <div class="loader-fill" id="loader-fill"></div>
+        </div>
+
+        <ol class="loader-steps" id="loader-steps">
+          <li data-step="upload">Streaming the package into memory</li>
+          <li data-step="analyze">Unzipping and running the 27 checks</li>
+          <li data-step="summary">Writing the plain-English summary</li>
+        </ol>
+
+        <p class="loader-note" id="loader-note">Nothing is written to disk at any point.</p>
       </div>
     </section>
 
