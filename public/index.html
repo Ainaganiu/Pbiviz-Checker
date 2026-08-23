@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PBIVIZ Compliance Checker</title>
+  <meta name="description" content="Check your Power BI custom visual against Microsoft's AppSource certification checklist before the reviewers do. Your file never leaves your session.">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%2305070c'/><circle cx='21' cy='11' r='4' fill='%231a63ff'/></svg>">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="/"><span class="brand-mark" aria-hidden="true"></span> PBIVIZ Checker</a>
+      <nav class="nav-links" aria-label="Main">
+        <a href="/dashboard">Activity</a>
+        <a href="https://learn.microsoft.com/en-us/power-bi/developer/visuals/power-bi-custom-visuals-certified">Certification docs</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="wrap hero">
+      <h1>Check your pbiviz against the certification checklist <em>before Microsoft's reviewers do.</em></h1>
+      <p class="lede">
+        Drop in a <code>.pbiviz</code> and get an instant pass/fail against the AppSource security and
+        accessibility requirements, a weighted score, and a plain-English summary of what to fix first.
+      </p>
+      <p class="privacy-strip"><span class="dot" aria-hidden="true"></span> Your file never leaves your session — analyzed in memory, never written to disk, never logged.</p>
+
+      <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-describedby="dropzone-hint">
+        <h2>Drop your .pbiviz here</h2>
+        <p id="dropzone-hint">or choose a file — nothing is uploaded to storage, and nothing is kept after the result is returned.</p>
+        <button type="button" class="btn" id="browse-btn">Choose a .pbiviz file</button>
+        <input type="file" id="file-input" class="visually-hidden" accept=".pbiviz,application/zip">
+      </div>
+
+      <div class="notice" id="error-notice" hidden role="alert"></div>
+      <div class="progress" id="progress" hidden>
+        <span class="spinner" aria-hidden="true"></span>
+        <span>Unzipping in memory and running the checklist…</span>
+      </div>
+    </section>
+
+    <section class="wrap results" id="results" hidden aria-live="polite">
+      <div class="scorecard">
+        <div class="dial" id="dial" role="img" aria-label="Compliance score">
+          <div class="dial-value"><span id="score-value">0</span><span>/100</span></div>
+        </div>
+        <div>
+          <p class="score-band" id="score-band"></p>
+          <p class="score-meta" id="score-meta"></p>
+          <div class="chips" id="score-chips"></div>
+        </div>
+      </div>
+
+      <p class="confidence" id="confidence"></p>
+
+      <div class="summary-card" id="summary-card" hidden>
+        <h3>What this means</h3>
+        <p id="summary-text"></p>
+        <ol id="summary-fixes"></ol>
+        <p class="attribution" id="summary-attribution"></p>
+      </div>
+
+      <h2 class="section-title">Checklist</h2>
+      <p class="section-note">Each row links to the Microsoft Learn page behind the requirement. Rows marked <em>best-effort detection</em> come from static pattern scanning, not execution.</p>
+      <div id="categories"></div>
+
+      <p style="margin-top:2rem">
+        <button type="button" class="btn btn-ghost" id="check-another">Check another file</button>
+      </p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-grid">
+      <div>
+        <h4>Nothing is stored</h4>
+        <p>Your <code>.pbiviz</code> is streamed into memory, unzipped, analyzed and discarded within a single request. It is never written to disk and never logged.</p>
+      </div>
+      <div>
+        <h4>What we count</h4>
+        <p>Two numbers only: how many files were checked, and how many recommendations were shown. No file names, no IPs, no results. <a href="/dashboard">See the numbers</a>.</p>
+      </div>
+      <div>
+        <h4>Where the AI fits</h4>
+        <p>Only the derived JSON result — score, rule IDs, reasons — is sent to a language model to write the summary. Your file and your code are never sent anywhere.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/app.js" type="module"></script>
+</body>
+</html>

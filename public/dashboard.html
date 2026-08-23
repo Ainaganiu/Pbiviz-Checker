@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Activity — PBIVIZ Compliance Checker</title>
+  <meta name="description" content="The only two numbers this service keeps: files checked, and recommendations shown.">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%2305070c'/><circle cx='21' cy='11' r='4' fill='%231a63ff'/></svg>">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="/"><span class="brand-mark" aria-hidden="true"></span> PBIVIZ Checker</a>
+      <nav class="nav-links" aria-label="Main">
+        <a href="/">Check a file</a>
+        <a href="https://learn.microsoft.com/en-us/power-bi/developer/visuals/power-bi-custom-visuals-certified">Certification docs</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap" style="padding-bottom:4rem">
+    <section class="hero" style="padding-bottom:0">
+      <h1 style="font-size:clamp(1.8rem,4vw,2.5rem)">Activity</h1>
+      <p class="lede">These two counters are the complete set of data this service retains. No file names, no IP addresses, no check results — just how often it was used.</p>
+    </section>
+
+    <div class="notice" id="error-notice" hidden role="alert"></div>
+
+    <h2 class="section-title">Files checked</h2>
+    <div class="stat-grid" id="uploads-stats"></div>
+
+    <h2 class="section-title">Recommendations shown</h2>
+    <div class="stat-grid" id="recs-stats"></div>
+
+    <h2 class="section-title">Files checked, last 30 days</h2>
+    <p class="section-note" id="chart-note">One bar per day, UTC.</p>
+    <div class="chart">
+      <div class="bars" id="bars" role="img" aria-label="Daily uploads over the last 30 days"></div>
+      <div class="bar-axis" id="bar-axis"></div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <h4>Why only two numbers?</h4>
+      <p>Because the promise on the front page is that your file never leaves your session. Keeping anything derived from it — a name, a score, a hostname — would quietly break that. <a href="/">Check a file</a>.</p>
+    </div>
+  </footer>
+
+  <script src="/dashboard.js" type="module"></script>
+</body>
+</html>

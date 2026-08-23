@@ -1,0 +1,21 @@
+{
+  "name": "pbiviz-checker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Check a .pbiviz against Microsoft's AppSource certification checklist. Nothing is stored.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.js",
+    "dev": "node --watch --env-file-if-exists=.env server.js",
+    "test": "node --test \"test/*.test.js\""
+  },
+  "dependencies": {
+    "@libsql/client": "^0.17.4",
+    "express": "^4.21.2",
+    "fflate": "^0.8.2",
+    "multer": "^1.4.5-lts.1"
+  }
+}

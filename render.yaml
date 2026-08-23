@@ -1,0 +1,36 @@
+services:
+  - type: web
+    name: pbiviz-checker
+    runtime: node
+    plan: free             # no disk needed: the counters live in a hosted Turso database
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+
+      # --- counters -------------------------------------------------------
+      # Two integers per day, and nothing else, ever. Free-tier Render instances
+      # have no disk and sleep when idle, so this has to live off-box to survive.
+      # Leave both unset and the app falls back to a local file: it still runs,
+      # the dashboard just says the numbers reset on restart.
+      - key: TURSO_DATABASE_URL
+        sync: false        # libsql://<db>-<org>.turso.io
+      - key: TURSO_AUTH_TOKEN
+        sync: false
+
+      # --- summary (optional) ---------------------------------------------
+      # Without a key the checklist and score still render; only the prose goes.
+      - key: PUBLIC_URL
+        sync: false        # set to the live Render URL; sent to OpenRouter as the referer
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: OPENROUTER_MODEL
+        # Comma-separated, tried in order. Free slugs come and go, so keep spares.
+        value: google/gemma-4-31b-it:free,nvidia/nemotron-nano-9b-v2:free,google/gemma-4-26b-a4b-it:free
+      - key: HF_API_KEY
+        sync: false        # independent fallback provider
+      - key: HF_MODEL
+        value: meta-llama/Meta-Llama-3-8B-Instruct,mistralai/Mistral-7B-Instruct-v0.3
