@@ -59,7 +59,7 @@ function startLoader(file) {
   loaderFile.textContent = `${file.name} · ${formatBytes(file.size)}`;
   loaderTitle.textContent = 'Uploading';
   loaderNote.textContent = 'Nothing is written to disk at any point.';
-  loaderNote.classList.remove('patience');
+  loaderNote.hidden = false;
   loaderTrack.classList.remove('indeterminate');
   loaderFill.style.width = '0%';
   setStep('upload');
@@ -84,13 +84,12 @@ function enterAnalyzePhase() {
   loaderTrack.classList.add('indeterminate');
   loaderNote.textContent = 'Unzipping the package and running all 27 checks. Your file is never written to disk.';
 
-  // The checks finish in a couple of seconds; anything longer is the free-tier
-  // model writing the summary. Say so instead of leaving the user guessing.
+  // The checks finish in a couple of seconds; anything longer is the summary
+  // being written, so advance the step rather than leaving the list frozen.
   patienceTimer = setTimeout(() => {
     setStep('summary');
     loaderTitle.textContent = 'Writing the summary';
-    loaderNote.textContent = 'The checks are done. A free-tier model is writing the plain-English summary, which can take up to 20 seconds — the results appear as soon as it answers.';
-    loaderNote.classList.add('patience');
+    loaderNote.hidden = true;
   }, PATIENCE_AFTER_MS);
 }
 

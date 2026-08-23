@@ -235,7 +235,7 @@ button:focus-visible,
 @keyframes loader-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
 
 .loader-note { margin: 1rem 0 0; font-size: 0.86rem; color: var(--ink-3); }
-.loader-note.patience { color: var(--ink-2); }
+.loader-note[hidden] { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
   .loader { animation: none; }
