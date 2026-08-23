@@ -8,66 +8,55 @@ export const SEVERITY_WEIGHTS = {
   low: 3,
 };
 
-const DOCS = {
-  certification: 'https://learn.microsoft.com/en-us/power-bi/developer/visuals/power-bi-custom-visuals-certified',
-  submission: 'https://learn.microsoft.com/en-us/power-bi/developer/visuals/submission-testing',
-  metadata: 'https://learn.microsoft.com/en-us/power-bi/developer/visuals/visual-project-structure',
-  changelog: 'https://learn.microsoft.com/en-us/power-bi/developer/visuals/changelog',
-  privileges: 'https://learn.microsoft.com/en-us/power-bi/developer/visuals/capabilities',
-  webAccess: 'https://learn.microsoft.com/en-us/power-bi/developer/visuals/webaccess-privilege',
-  localStorage: 'https://learn.microsoft.com/en-us/power-bi/developer/visuals/local-storage',
-  exportData: 'https://learn.microsoft.com/en-us/power-bi/developer/visuals/export-data',
-  accessibility: 'https://learn.microsoft.com/en-us/power-bi/developer/visuals/accessibility-overview',
-  keyboard: 'https://learn.microsoft.com/en-us/power-bi/developer/visuals/accessibility-keyboard-navigation',
-  highContrast: 'https://learn.microsoft.com/en-us/power-bi/developer/visuals/high-contrast-support',
-  localization: 'https://learn.microsoft.com/en-us/power-bi/developer/visuals/localization',
-  guidelines: 'https://learn.microsoft.com/en-us/power-bi/developer/visuals/guidelines-powerbi-visuals',
-};
+// One reference for every rule: the Power BI custom visuals documentation hub.
+// Deep links into individual checklist pages get reorganised and 404; the hub
+// is stable, so rows link there and carry the rule ID for the specific item.
+const VISUALS_DOCS = 'https://learn.microsoft.com/en-us/power-bi/developer/visuals/';
 
 // id -> { title, severity, doc, bestEffort }
 // `bestEffort` marks rules that rely on pattern-scanning source rather than
 // reading structured JSON — the UI renders the "best-effort detection" badge for these.
 export const RULES = {
   // --- Manifest integrity -------------------------------------------------
-  'MAN-001': { title: 'Manifest present and parseable', severity: 'high', doc: DOCS.metadata },
-  'MAN-002': { title: 'API version declared and valid', severity: 'high', doc: DOCS.changelog },
-  'MAN-003': { title: 'API version is currently supported', severity: 'high', doc: DOCS.changelog },
-  'MAN-004': { title: 'Required manifest fields present', severity: 'high', doc: DOCS.metadata },
-  'MAN-005': { title: 'Visual version is valid semver', severity: 'low', doc: DOCS.metadata },
-  'MAN-006': { title: 'Support URL and description declared', severity: 'low', doc: DOCS.submission },
+  'MAN-001': { title: 'Manifest present and parseable', severity: 'high', doc: VISUALS_DOCS },
+  'MAN-002': { title: 'API version declared and valid', severity: 'high', doc: VISUALS_DOCS },
+  'MAN-003': { title: 'API version is currently supported', severity: 'high', doc: VISUALS_DOCS },
+  'MAN-004': { title: 'Required manifest fields present', severity: 'high', doc: VISUALS_DOCS },
+  'MAN-005': { title: 'Visual version is valid semver', severity: 'low', doc: VISUALS_DOCS },
+  'MAN-006': { title: 'Support URL and description declared', severity: 'low', doc: VISUALS_DOCS },
 
   // --- External network calls --------------------------------------------
-  'NET-001': { title: 'External network calls are declared', severity: 'critical', doc: DOCS.webAccess, bestEffort: true },
-  'NET-002': { title: 'Declared domains are specific, not wildcards', severity: 'high', doc: DOCS.webAccess },
-  'NET-003': { title: 'No undeclared telemetry / analytics endpoints', severity: 'critical', doc: DOCS.webAccess, bestEffort: true },
+  'NET-001': { title: 'External network calls are declared', severity: 'critical', doc: VISUALS_DOCS, bestEffort: true },
+  'NET-002': { title: 'Declared domains are specific, not wildcards', severity: 'high', doc: VISUALS_DOCS },
+  'NET-003': { title: 'No undeclared telemetry / analytics endpoints', severity: 'critical', doc: VISUALS_DOCS, bestEffort: true },
 
   // --- Data export / local storage ---------------------------------------
-  'STO-001': { title: 'Local storage usage is declared', severity: 'high', doc: DOCS.localStorage, bestEffort: true },
-  'STO-002': { title: 'Content export is declared', severity: 'critical', doc: DOCS.exportData, bestEffort: true },
-  'STO-003': { title: 'No unsupported browser storage APIs', severity: 'high', doc: DOCS.localStorage, bestEffort: true },
+  'STO-001': { title: 'Local storage usage is declared', severity: 'high', doc: VISUALS_DOCS, bestEffort: true },
+  'STO-002': { title: 'Content export is declared', severity: 'critical', doc: VISUALS_DOCS, bestEffort: true },
+  'STO-003': { title: 'No unsupported browser storage APIs', severity: 'high', doc: VISUALS_DOCS, bestEffort: true },
 
   // --- Accessibility ------------------------------------------------------
-  'A11Y-001': { title: 'Keyboard navigation hooks present', severity: 'medium', doc: DOCS.keyboard, bestEffort: true },
-  'A11Y-002': { title: 'ARIA labels / roles present', severity: 'low', doc: DOCS.accessibility, bestEffort: true },
-  'A11Y-003': { title: 'High contrast mode support', severity: 'medium', doc: DOCS.highContrast, bestEffort: true },
+  'A11Y-001': { title: 'Keyboard navigation hooks present', severity: 'medium', doc: VISUALS_DOCS, bestEffort: true },
+  'A11Y-002': { title: 'ARIA labels / roles present', severity: 'low', doc: VISUALS_DOCS, bestEffort: true },
+  'A11Y-003': { title: 'High contrast mode support', severity: 'medium', doc: VISUALS_DOCS, bestEffort: true },
 
   // --- Certification blockers --------------------------------------------
-  'BLK-001': { title: 'No eval() or dynamic code construction', severity: 'critical', doc: DOCS.certification, bestEffort: true },
-  'BLK-002': { title: 'No dynamic script injection', severity: 'critical', doc: DOCS.certification, bestEffort: true },
-  'BLK-003': { title: 'No iframe usage', severity: 'high', doc: DOCS.certification, bestEffort: true },
-  'BLK-004': { title: 'No CSP-unsafe DOM patterns', severity: 'medium', doc: DOCS.certification, bestEffort: true },
+  'BLK-001': { title: 'No eval() or dynamic code construction', severity: 'critical', doc: VISUALS_DOCS, bestEffort: true },
+  'BLK-002': { title: 'No dynamic script injection', severity: 'critical', doc: VISUALS_DOCS, bestEffort: true },
+  'BLK-003': { title: 'No iframe usage', severity: 'high', doc: VISUALS_DOCS, bestEffort: true },
+  'BLK-004': { title: 'No CSP-unsafe DOM patterns', severity: 'medium', doc: VISUALS_DOCS, bestEffort: true },
 
   // --- Dependencies -------------------------------------------------------
-  'DEP-001': { title: 'No known-vulnerable dependencies', severity: 'high', doc: DOCS.certification },
-  'DEP-002': { title: 'Dependency versions are pinned', severity: 'low', doc: DOCS.certification },
-  'DEP-003': { title: 'License declared and redistribution-safe', severity: 'low', doc: DOCS.submission },
+  'DEP-001': { title: 'No known-vulnerable dependencies', severity: 'high', doc: VISUALS_DOCS },
+  'DEP-002': { title: 'Dependency versions are pinned', severity: 'low', doc: VISUALS_DOCS },
+  'DEP-003': { title: 'License declared and redistribution-safe', severity: 'low', doc: VISUALS_DOCS },
 
   // --- Packaging / hygiene -----------------------------------------------
-  'PKG-001': { title: 'No source maps bundled', severity: 'medium', doc: DOCS.submission },
-  'PKG-002': { title: 'Icon and assets complete', severity: 'medium', doc: DOCS.submission },
-  'PKG-003': { title: 'Localization resources declared', severity: 'low', doc: DOCS.localization },
-  'PKG-004': { title: 'Bundle size within recommended limit', severity: 'low', doc: DOCS.guidelines },
-  'PKG-005': { title: 'Error handling around risky operations', severity: 'low', doc: DOCS.guidelines, bestEffort: true },
+  'PKG-001': { title: 'No source maps bundled', severity: 'medium', doc: VISUALS_DOCS },
+  'PKG-002': { title: 'Icon and assets complete', severity: 'medium', doc: VISUALS_DOCS },
+  'PKG-003': { title: 'Localization resources declared', severity: 'low', doc: VISUALS_DOCS },
+  'PKG-004': { title: 'Bundle size within recommended limit', severity: 'low', doc: VISUALS_DOCS },
+  'PKG-005': { title: 'Error handling around risky operations', severity: 'low', doc: VISUALS_DOCS, bestEffort: true },
 };
 
 // Ordered category definitions — drives both the analyzer and the results table.
