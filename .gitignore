@@ -2,3 +2,6 @@ node_modules/
 data/
 .env
 *.log
+
+# Source headshot; the site serves the resized public/author.jpg instead.
+image_profile.png
