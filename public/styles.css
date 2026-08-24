@@ -385,6 +385,41 @@ p.section-note { margin: 0 0 1rem; color: var(--ink-3); font-size: 0.93rem; }
 .detail-list { margin: 0.5rem 0 0; padding-left: 1.1rem; font-size: 0.87rem; color: var(--ink-2); font-family: var(--mono); }
 
 /* ---------- footer ---------- */
+/* ---------- author ---------- */
+.author {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 3rem 0 2.5rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+}
+.author-photo {
+  width: 72px; height: 72px; flex: none;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--white);
+  box-shadow: 0 0 0 1px var(--line);
+}
+.author-body { min-width: 0; }
+.author-kicker {
+  margin: 0; font-size: 0.72rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-3);
+}
+.author-name {
+  margin: 0.1rem 0 0.3rem; font-weight: 700; font-size: 1.02rem;
+  letter-spacing: -0.01em; color: var(--black);
+}
+.author-link {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  font-size: 0.9rem; color: var(--blue-600); text-decoration: none;
+}
+.author-link:hover { color: var(--blue-700); text-decoration: underline; }
+.author-icon { flex: none; }
+
+/* ---------- footer ---------- */
 .site-footer {
   border-top: 1px solid var(--line);
   background: var(--black);
