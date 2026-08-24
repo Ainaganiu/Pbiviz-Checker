@@ -1,0 +1,49 @@
+# Render's free plan spins an instance down after ~15 minutes of no traffic, and
+# the next visitor pays 50s+ of cold start before index.html even renders. This
+# keeps the instance awake by hitting the cheapest endpoint on it.
+#
+# Two things to know about GitHub's scheduler:
+#   - It is best-effort. A */10 schedule is regularly delayed under load, so the
+#     retries below matter: a missed slot must not also be a failed ping.
+#   - Scheduled workflows are disabled automatically after 60 days with no
+#     activity in the repository. If the site starts sleeping again, check that
+#     this workflow is still enabled before looking anywhere else.
+name: Keep warm
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+# Nothing here touches the repository.
+permissions: {}
+
+concurrency:
+  group: keep-warm
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Ping /api/health
+        env:
+          # Override without editing this file by setting a PING_URL repository
+          # variable (Settings -> Secrets and variables -> Actions -> Variables).
+          BASE_URL: ${{ vars.PING_URL || 'https://pbiviz-checker.onrender.com' }}
+        run: |
+          set -u
+          for attempt in 1 2 3; do
+            # --max-time 100 because a fully cold instance can take well over a
+            # minute to answer, and giving up early would defeat the point.
+            code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 100 "$BASE_URL/api/health" || echo 000)
+            echo "attempt $attempt: HTTP $code"
+            if [ "$code" = "200" ]; then
+              echo "instance is awake"
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "::error::$BASE_URL/api/health did not return 200 after 3 attempts"
+          exit 1
